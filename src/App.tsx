@@ -1,24 +1,37 @@
 import React from 'react';
-import logo from './logo.svg';
+import { useDispatch, useSelector } from 'react-redux';
 import './App.css';
+import ChatContainer from './containers/chat-container.component';
+import LoginComponent from './containers/login.component';
+import { AuthService } from './domain/services/auth.service';
+import { UserDTO } from './domain/models/types';
+import { RootState } from './store';
+import { setCurrentUser } from './store/actions';
 
 function App() {
+  const dispatch = useDispatch();
+  const isLoggedIn = useSelector((state: RootState) => state.global.isLoggedIn);
+ 
+  const authenticate = (user: UserDTO) => {
+
+    AuthService.getInstance().authenticate(user).then((res)=> {
+      const user = AuthService.getInstance().getCurrentUser();
+      if(user)
+      dispatch(setCurrentUser(user));
+    })
+  }
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <nav className="navbar navbar-dark bg-primary">
+        <div className="container"><span className="navbar-brand mb-0 h1">Messenger App</span></div>
+      </nav>
+      <br/>
+
+      <div className="container">
+      { isLoggedIn ? <ChatContainer /> : <LoginComponent onLogin={authenticate} />}
+      </div>
+
+     
     </div>
   );
 }
